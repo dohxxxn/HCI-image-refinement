@@ -38,7 +38,7 @@ import PromptInput from './components/PromptInput.vue'
 import OriginalImage from './components/OriginalImage.vue'
 import RefinedImage from './components/RefinedImage.vue'
 import KeywordSelector from './components/KeywordSelector.vue'
-import { generateImage, generateKeywords } from './api/openai'
+import { generateImage, generateRefinedImagePrompt } from './api/openai'
 
 const originalImage = ref('')
 const refinedImage = ref('')
@@ -47,22 +47,28 @@ const showKeywords = ref(false)
 const isLoading = ref(false)
 const error = ref(null)
 const retryCount = ref(0)
+const lastPrompt = ref('')  // store the last user prompt
+const subject = ref('')
+
 
 async function handleGenerate(prompt) {
   try {
     isLoading.value = true
     error.value = null
     retryCount.value = 0
-    
+    lastPrompt.value = prompt  // store for reuse
+
     console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_API_KEY)
 
     // Generate the initial image
     originalImage.value = await generateImage(prompt)
-    
-    // Generate keywords for refinement
-    keywords.value = await generateKeywords(prompt)
+
+    // Get subject, keywords, and refined prompt
+    const result = await generateRefinedImagePrompt(prompt)
+    subject.value = result.subject
+    keywords.value = result.keywords
     showKeywords.value = true
-    refinedImage.value = '' // Reset refined image
+    refinedImage.value = ''  // reset refined image
   } catch (err) {
     if (err.message.includes('Rate limit exceeded')) {
       error.value = `Rate limit exceeded. This is normal for new accounts. Please wait about 1 minute before trying again. (Attempt ${retryCount.value + 1}/3)`
@@ -76,13 +82,24 @@ async function handleGenerate(prompt) {
   }
 }
 
+
 async function handleRefine(selectedKeywords) {
   try {
     isLoading.value = true
     error.value = null
-    
-    // Combine original prompt with selected keywords
-    const refinementPrompt = `${selectedKeywords.join(', ')}`
+    // Normalize subject into word list
+    const subjectWords = subject.value.toLowerCase().split(/\s+/)
+
+    // Filter out keywords that contain any subject words
+    const filteredKeywords = selectedKeywords.filter(kw => {
+      const kwWords = kw.toLowerCase().split(/\s+/)
+      return kwWords.every(word => !subjectWords.includes(word))
+    })
+
+    // Build a new refinement prompt using the last prompt + selected keywords
+    const refinementPrompt = `${lastPrompt.value}. Make the subject ${subject.value} have the following characteristics:${filteredKeywords.join(', ')}.`
+
+    // Generate the refined image
     refinedImage.value = await generateImage(refinementPrompt)
   } catch (err) {
     error.value = `Error: ${err.message}`
