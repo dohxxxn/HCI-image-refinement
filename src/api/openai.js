@@ -68,7 +68,7 @@ export const generateSubjectKeywords = async (subject) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that generates relevant keywords for image refinement. Return only a JSON array of 10 keywords.'
+            content: 'You are a helpful assistant that generates relevant keywords for image refinement. Return only a JSON array of 10 keywords consisting of popular artistic or style keywords and keywords that make the existing description of the subject more precise.'
           },
           {
             role: 'user',
@@ -101,7 +101,7 @@ export const refinePrompt = (originalPrompt, subject, keywords) => {
 
   const list = filteredKeywords.join(', ');
   return {
-    refinedPrompt: `${originalPrompt}. Make the subject ${subject} have the following characteristics: ${list}.`,
+    refinedPrompt: `${originalPrompt}. Make sure the image is realistic. Make the subject ${subject} have the following characteristics: ${list}.`,
     filteredKeywords
   };
 };

@@ -1,23 +1,27 @@
 <template>
-    <div>
-      <h3>1. Enter a prompt</h3>
-      <input v-model="prompt" type="text" placeholder="e.g. A futuristic city at night" />
-      <button @click="onGenerate">Generate Image</button>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  
-  const prompt = ref('')
-  const emit = defineEmits(['generate'])
-  
-  function onGenerate() {
-    if (prompt.value.trim()) {
-      emit('generate', prompt.value)
-    }
-  }
-  </script>
+  <div class="flex flex-col gap-4">
+    <input
+        type="text"
+        v-model="prompt"
+        placeholder="Enter your image prompt..."
+        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+    />
+    <button
+        @click="emit('generate', prompt)"
+        :disabled="disabled"
+        class="bg-blue-100 text-blue-700 hover:bg-blue-200 font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
+    >
+      Generate Image
+    </button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const prompt = ref('')
+defineProps(['disabled'])
+const emit = defineEmits(['generate'])
+</script>
 
 <style scoped>
 .prompt-input {

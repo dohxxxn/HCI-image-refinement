@@ -1,6 +1,6 @@
 <template>
     <div>
-      <h3>3. Image Refinement</h3>
+<!--      <h3>Image Refinement</h3>-->
       <h3>If you want to refine the image, please click the keyword(s) below you want to add</h3>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <button
@@ -12,7 +12,13 @@
           {{ kw }}
         </button>
       </div>
-      <button @click="refine">Refine Image</button>
+      <button
+          @click="refine"
+          :disabled="disabled"
+          class="bg-blue-100 text-blue-700 hover:bg-blue-200 font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
+      >
+        Refine Image
+      </button>
     </div>
   </template>
   
