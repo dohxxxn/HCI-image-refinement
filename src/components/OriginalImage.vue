@@ -1,7 +1,7 @@
 <template>
   <div class="w-full flex justify-center">
     <div v-if="loading" class="text-gray-500 italic py-8">
-      Generating image...
+      Generating image, this will take around 10 seconds ...
     </div>
     <div v-else-if="src">
       <img :src="src" alt="Generated image" class="rounded-lg shadow-md max-w-full h-auto" />

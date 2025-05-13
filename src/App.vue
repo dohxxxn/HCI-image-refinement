@@ -124,7 +124,7 @@ async function handleRefine(selectedKeywords) {
     })
 
     // Build a new refinement prompt using the last prompt + selected keywords
-    const refinementPrompt = `${lastPrompt.value}. Make sure the image is realistic. Make the subject ${subject.value} have the following characteristics:${filteredKeywords.join(', ')}.`
+    const refinementPrompt = `${lastPrompt.value}. Make sure the image is realistic. Make the subject ${subject.value} have the following characteristics:${filteredKeywords.join(', ')}.Make sure that the result looks like how "${subject}" looks like in real life.`
 
     // Generate the refined image
     refinedImage.value = await generateImage(refinementPrompt)
