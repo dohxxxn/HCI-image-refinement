@@ -36,7 +36,7 @@ export const identifyMainSubject = async (prompt) => {
   const res = await retryWithBackoff(() => axios.post(
       `${API_URL}/chat/completions`,
       {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4-turbo',
         messages: [
           {
             role: 'system',
@@ -64,7 +64,7 @@ export const generateSubjectKeywords = async (subject) => {
   const res = await retryWithBackoff(() => axios.post(
       `${API_URL}/chat/completions`,
       {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4-turbo',
         messages: [
           {
             role: 'system',
@@ -72,7 +72,7 @@ export const generateSubjectKeywords = async (subject) => {
           },
           {
             role: 'user',
-            content: `Generate 10 keywords that would help refine an image of a "${subject}".`
+            content: `Generate 10 keywords that would help refine an image of "${subject}".`
           }
         ],
         temperature: 0.7
