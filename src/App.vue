@@ -72,30 +72,24 @@ const isGeneratingOriginal = ref(false)
 const isRefining = ref(false)
 const error = ref(null)
 const retryCount = ref(0)
-const lastPrompt = ref('')  // store the last user prompt
-const subject = ref('')
-
+const lastPrompt = ref('')
 
 async function handleGenerate(prompt) {
   try {
     isGeneratingOriginal.value = true
     error.value = null
     retryCount.value = 0
-    lastPrompt.value = prompt  // store for reuse
+    lastPrompt.value = prompt
 
-    console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_API_KEY)
-
-    // Generate the initial image
     originalImage.value = await generateImage(prompt)
 
-    // Get subject, keywords, and refined prompt
     const result = await generateRefinedImagePrompt(prompt)
-    subject.value = result.subject
     console.log('Original keywords:', result.keywords)
     keywords.value = await filterSimilarKeywords(result.keywords)
     console.log('Filtered keywords:', keywords.value)
+
     showKeywords.value = true
-    refinedImage.value = ''  // reset refined image
+    refinedImage.value = ''
   } catch (err) {
     if (err.message.includes('Rate limit exceeded')) {
       error.value = `Rate limit exceeded. This is normal for new accounts. Please wait about 1 minute before trying again. (Attempt ${retryCount.value + 1}/3)`
@@ -109,24 +103,15 @@ async function handleGenerate(prompt) {
   }
 }
 
-
 async function handleRefine(selectedKeywords) {
   try {
     isRefining.value = true
     error.value = null
-    // Normalize subject into word list
-    const subjectWords = subject.value.toLowerCase().split(/\s+/)
 
-    // Filter out keywords that contain any subject words
-    const filteredKeywords = selectedKeywords.filter(kw => {
-      const kwWords = kw.toLowerCase().split(/\s+/)
-      return kwWords.every(word => !subjectWords.includes(word))
-    })
+    const filteredKeywords = await filterSimilarKeywords(selectedKeywords)
+    const list = filteredKeywords.join(', ')
+    const refinementPrompt = `${lastPrompt.value}. Make sure the image is realistic. Emphasize the following visual details: ${list}.`
 
-    // Build a new refinement prompt using the last prompt + selected keywords
-    const refinementPrompt = `${lastPrompt.value}. Make sure the image is realistic. Make the subject ${subject.value} have the following characteristics:${filteredKeywords.join(', ')}.Make sure that the result looks like how "${subject}" looks like in real life.`
-
-    // Generate the refined image
     refinedImage.value = await generateImage(refinementPrompt)
   } catch (err) {
     error.value = `Error: ${err.message}`
